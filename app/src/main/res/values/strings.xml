@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">Lab7Book</string>
+    <string name="book1">Animal Farm</string>
+    <string name="book2">Little Women</string>
+    <string name="book3">50 Shades of Grey</string>
+    <string name="book4">Harry Potter</string>
+    <string name="book5">Lord of the Rings</string>
+    <string name="book6">The Lion King</string>
+    <string name="book7">The Hobbit</string>
+    <string name="book8">Gone Girl</string>
+    <string name="book9">Riders</string>
+    <string name="book10">The Godfather</string>
+
+
+    <string-array name="bookArray">
+        <item>@string/book1</item>
+        <item>@string/book2</item>
+        <item>@string/book3</item>
+        <item>@string/book4</item>
+        <item>@string/book5</item>
+        <item>@string/book6</item>
+        <item>@string/book7</item>
+        <item>@string/book8</item>
+        <item>@string/book9</item>
+        <item>@string/book10</item>
+    </string-array>
 </resources>
