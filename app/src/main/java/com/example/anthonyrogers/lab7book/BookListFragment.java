@@ -15,8 +15,9 @@ public class BookListFragment extends Fragment {
 
     String[] array;
     Context parent;
+    ListView listView;
     public BookListFragment() {
-        array = getResources().getStringArray(R.array.bookArray);
+
     }
 
     @Override
@@ -37,10 +38,10 @@ public class BookListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_book_list, container, false);
 
-     //  ArrayAdapter adapter = new ArrayAdapter<String>(parent, R.layout.fragment_book_list, array);
-
-       // ListView listView = getActivity().findViewById(R.id.List_View);
-        //listView.setAdapter(adapter);
+      listView = view.findViewById(R.id.List_View);
+       ArrayAdapter adapter = new ArrayAdapter<>(parent, android.R.layout.simple_list_item_1,
+               parent.getResources().getStringArray(R.array.bookArray));
+        listView.setAdapter(adapter);
         return view;
     }
 
