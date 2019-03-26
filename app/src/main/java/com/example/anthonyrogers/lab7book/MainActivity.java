@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 private ViewPager mViewPager;
 boolean singlePane;
 FragmentManager fm;
-BookListFragment blf;
+BookDetailsFragment bdf;
 
 
     @Override
@@ -29,7 +29,7 @@ BookListFragment blf;
         setContentView(R.layout.activity_main);
 
         final  String[] array = getResources().getStringArray(R.array.bookArray);
-        blf = new BookListFragment();
+        bdf = new BookDetailsFragment();
 
         singlePane = findViewById(R.id.frame2) == null;
 
@@ -49,7 +49,7 @@ BookListFragment blf;
                     .commit();
 
             fm.beginTransaction()
-                    .replace(R.id.frame2, new BookDetailsFragment())
+                    .replace(R.id.frame2, bdf)
                     .commit();
         }
     }
@@ -57,8 +57,12 @@ BookListFragment blf;
     @Override
     public void BookName(String nameOfBook) {
 
-            BookDetailsFragment df = BookDetailsFragment.newInstance(nameOfBook);
-            fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
+            //This creates a new Book Details Fragment Everytime a listview is clicked
+           // BookDetailsFragment df = BookDetailsFragment.newInstance(nameOfBook);
+           // fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
+
+        bdf.displayBook(nameOfBook);
     }
+
 
 }
