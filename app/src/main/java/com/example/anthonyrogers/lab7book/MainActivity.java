@@ -55,5 +55,11 @@ BookListFragment blf;
     }
 
 
+    @Override
+    public void BookName(String nameOfBook) {
+
+            BookDetailsFragment df = BookDetailsFragment.newInstance(nameOfBook);
+            fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
+    }
 
 }
