@@ -24,10 +24,12 @@ private ViewPager mViewPager;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mViewPager = findViewById(R.id.view_pager);
-        mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager()));
+        final  String[] array = getResources().getStringArray(R.array.bookArray);
 
-   //  final  String[] array = getResources().getStringArray(R.array.bookArray);
+        mViewPager = findViewById(R.id.view_pager);
+        mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), array));
+
+
 
       /*  PagerAdapter pageradapter = new PagerAdapter() {
             @Override

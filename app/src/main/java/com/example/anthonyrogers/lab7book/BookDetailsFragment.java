@@ -44,7 +44,7 @@ public class BookDetailsFragment extends Fragment {
        View view = inflater.inflate(R.layout.fragment_book_details, container, false);
         textView = view.findViewById(R.id.TextOnFrag);
 
-       textView.setText("heyy");
+       textView.setText(bookName);
 
         return view;
     }
