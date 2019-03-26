@@ -14,7 +14,7 @@ import android.widget.ListView;
 
 public class BookListFragment extends Fragment {
 
-    String[] array;
+
     Context parent;
     ListView listView;
     public BookListFragment() {
@@ -31,7 +31,6 @@ public class BookListFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         this.parent = context;
-
     }
 
     @Override

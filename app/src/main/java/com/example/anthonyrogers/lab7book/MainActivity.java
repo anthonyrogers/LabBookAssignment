@@ -54,7 +54,6 @@ BookListFragment blf;
         }
     }
 
-
     @Override
     public void BookName(String nameOfBook) {
 

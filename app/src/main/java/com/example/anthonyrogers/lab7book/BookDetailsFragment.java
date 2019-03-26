@@ -15,7 +15,7 @@ public class BookDetailsFragment extends Fragment {
     private String bookName;
     TextView textView;
 
-    private OnFragmentInteractionListener mListener;
+
 
     public BookDetailsFragment() {
         // Required empty public constructor
@@ -50,19 +50,4 @@ public class BookDetailsFragment extends Fragment {
     }
 
 
-  /*  @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }*/
-
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 }
