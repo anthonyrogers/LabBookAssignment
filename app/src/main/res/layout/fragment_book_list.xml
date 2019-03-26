@@ -6,11 +6,8 @@
     tools:context=".BookListFragment">
 
 
-    <TextView
-        android:id="@+id/Book_Details_Textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textAlignment="textStart"
-        android:textSize="24sp" />
+    <ListView
+        android:id="@+id/List_View"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </FrameLayout>

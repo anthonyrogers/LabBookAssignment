@@ -18,6 +18,10 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 public class MainActivity extends AppCompatActivity implements BookListFragment.OnFragmentInteractionListener {
 
 private ViewPager mViewPager;
+boolean singlePane;
+FragmentManager fm;
+BookListFragment blf;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,34 +29,31 @@ private ViewPager mViewPager;
         setContentView(R.layout.activity_main);
 
         final  String[] array = getResources().getStringArray(R.array.bookArray);
+        blf = new BookListFragment();
 
-        mViewPager = findViewById(R.id.view_pager);
-        mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), array));
+        singlePane = findViewById(R.id.frame2) == null;
 
-
-
-      /*  PagerAdapter pageradapter = new PagerAdapter() {
-            @Override
-            public int getCount() {
-                return array.length;
-            }
-
-            @Override
-            public boolean isViewFromObject(@NonNull View view, @NonNull Object o) {
-                return false;
-            }
+        if(singlePane){
+            mViewPager = findViewById(R.id.view_pager);
+            mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), array));
+        }
 
 
-        };*/
 
-      //  ViewPager viewPager = findViewById(R.id.view_pager);
-      //  viewPager.setAdapter(pageradapter);
-//        ArrayAdapter adapter = new ArrayAdapter<>(this,
-//                R.layout.layout_list_view, array);
-//
-//        ListView listView = findViewById(R.id.main_list_view);
-//        listView.setAdapter(adapter);
+        fm = getSupportFragmentManager();
 
+        if (!singlePane) {
 
+            fm.beginTransaction()
+                    .replace(R.id.frame1, new BookListFragment())
+                    .commit();
+
+            fm.beginTransaction()
+                    .replace(R.id.frame2, new BookDetailsFragment())
+                    .commit();
+        }
     }
+
+   
+
 }

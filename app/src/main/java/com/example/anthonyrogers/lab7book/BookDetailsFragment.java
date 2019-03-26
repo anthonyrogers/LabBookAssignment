@@ -10,10 +10,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class BookDetailsFragment extends Fragment {
+
     private static final String Book_Name = "bookName";
     private String bookName;
     TextView textView;
-
 
     private OnFragmentInteractionListener mListener;
 
