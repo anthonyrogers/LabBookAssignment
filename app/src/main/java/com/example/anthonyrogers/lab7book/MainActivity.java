@@ -1,5 +1,7 @@
 package com.example.anthonyrogers.lab7book;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
@@ -10,18 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 public class MainActivity extends AppCompatActivity implements BookListFragment.OnFragmentInteractionListener {
 
-private ViewPager mViewPager;
-boolean singlePane;
-FragmentManager fm;
-BookDetailsFragment bdf;
-
+    private ViewPager mViewPager;
+    boolean singlePane;
+    FragmentManager fm;
+    BookDetailsFragment bdf;
+    TextView text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +40,57 @@ BookDetailsFragment bdf;
         setContentView(R.layout.activity_main);
 
 
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+
+                URL BookurlJson;
+
+                try {
+
+                    BookurlJson = new URL("https://kamorris.com/lab/audlib/booksearch.php");
+
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(
+                                    BookurlJson.openStream()));
+
+                    String response = "", tmpResponse;
+
+                    tmpResponse = reader.readLine();
+                    while (tmpResponse != null) {
+                        response = response + tmpResponse;
+                        tmpResponse = reader.readLine();
+                    }
+
+                    JSONArray jsonArray = new JSONArray(response);
+                    ArrayList<Book> booklist = new ArrayList<>();
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        String o = jsonArray.get(i).toString();
+                        JSONObject obj = new JSONObject(o);
+
+                        Book book = new Book();
+                        book.title = obj.getString("title");
+                        book.author = obj.getString("author");
+                        book.published = obj.getInt("published");
+                        book.id = obj.getInt("book_id");
+                        book.coverURL = obj.getString("cover_url");
+                        booklist.add(book);
+                    }
+
+                    Message message = new Message();
+                    message.obj = booklist;
+                    message.what = 0;
+
+                    handler.sendMessage(message);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
+            }
+        };
+        t.start();
+        
         //this grabs the the array of strings from android resources.
         final  String[] array = getResources().getStringArray(R.array.bookArray);
         bdf = new BookDetailsFragment();
@@ -70,6 +132,19 @@ BookDetailsFragment bdf;
 
         bdf.displayBook(nameOfBook);
     }
+
+
+    Handler handler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg) {
+
+            //int tfd = (int)msg.obj;
+            ArrayList<Book> hey = (ArrayList<Book>) msg.obj;
+
+            text.setText(hey.get(0).author);
+        }
+    };
 
 
 }
