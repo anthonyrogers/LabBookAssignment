@@ -28,20 +28,23 @@ BookDetailsFragment bdf;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        //this grabs the the array of strings from android resources.
         final  String[] array = getResources().getStringArray(R.array.bookArray);
         bdf = new BookDetailsFragment();
 
+        //this check to see if the frame2 id is available and says true if it is and false if its not.
         singlePane = findViewById(R.id.frame2) == null;
 
+
+        //this runs the fragment if the phone is in portrait mode
         if(singlePane){
             mViewPager = findViewById(R.id.view_pager);
             mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), array));
         }
-
-
-
         fm = getSupportFragmentManager();
 
+        //this sets frame one to a list and frame 2 to a single object fragment that will change textviews
         if (!singlePane) {
 
             fm.beginTransaction()
@@ -57,9 +60,13 @@ BookDetailsFragment bdf;
     @Override
     public void BookName(String nameOfBook) {
 
-            //This creates a new Book Details Fragment Everytime a listview is clicked
-           // BookDetailsFragment df = BookDetailsFragment.newInstance(nameOfBook);
-           // fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
+        //This creates a new Book Details Fragment Everytime a listview is clicked
+
+
+        //TODO: unmark this if you would like to create a new fragment of BookDetailsFragment when
+        //TODO: when viewing on a tablet or in landscape mode. Current we only create on instance and change textview
+        // BookDetailsFragment df = BookDetailsFragment.newInstance(nameOfBook);
+        // fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
 
         bdf.displayBook(nameOfBook);
     }

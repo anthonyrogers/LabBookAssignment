@@ -33,6 +33,9 @@ public class BookListFragment extends Fragment {
         this.parent = context;
     }
 
+
+    //creates an array list and sets an event listener to the parents public method that is going to be there due
+    //to it implementing an interface;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -57,7 +60,6 @@ public class BookListFragment extends Fragment {
 
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void BookName(String nameOfBook);
     }
 }

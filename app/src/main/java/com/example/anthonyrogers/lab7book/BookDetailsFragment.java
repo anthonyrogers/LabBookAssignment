@@ -18,10 +18,9 @@ public class BookDetailsFragment extends Fragment {
 
 
     public BookDetailsFragment() {
-        // Required empty public constructor
     }
 
-    // TODO: Rename and change types and number of parameters
+
     public static BookDetailsFragment newInstance(String param1) {
         BookDetailsFragment fragment = new BookDetailsFragment();
         Bundle args = new Bundle();

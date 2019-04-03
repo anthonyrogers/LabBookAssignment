@@ -14,10 +14,14 @@ public class MyViewPagerAdapter extends FragmentStatePagerAdapter {
         array = arrayOfBooks;
     }
 
+    //this is for the view pager. This creates a new instance of bookDetailsFragment using the factory
+    //method inside of the the fragment
     @Override
     public Fragment getItem(int i) {
         return BookDetailsFragment.newInstance(array[i]);
     }
+
+
 
     @Override
     public int getCount() {
