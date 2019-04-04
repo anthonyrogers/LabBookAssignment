@@ -2,18 +2,23 @@ package com.example.anthonyrogers.lab7book;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 
 
 import java.util.ArrayList;
 
 public class MyViewPagerAdapter extends FragmentStatePagerAdapter {
 
-    final  ArrayList<Book> array;
+    ArrayList<Book> array = new ArrayList<>();
 
 
     public MyViewPagerAdapter(FragmentManager fm, ArrayList<Book> arrayOfBooks) {
         super(fm);
-        array = arrayOfBooks;
+        array.addAll(arrayOfBooks);
+
+        Log.d("Books", arrayOfBooks.toString());
+        notifyDataSetChanged();
+        //array = arrayOfBooks;
     }
 
     //this is for the view pager. This creates a new instance of bookDetailsFragment using the factory

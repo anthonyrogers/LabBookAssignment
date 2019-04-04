@@ -24,6 +24,7 @@ public class BookDetailsFragment extends Fragment {
         return fragment;
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,18 +33,17 @@ public class BookDetailsFragment extends Fragment {
         }
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
        View view = inflater.inflate(R.layout.fragment_book_details, container, false);
         textView = view.findViewById(R.id.TextOnFrag);
 
-
         //TODO: create correct text view and photos after fixing error issues
-       textView.setText("hey");
+       textView.setText(books.author);
         return view;
     }
+
 
     public void displayBook(String title){
         TextView t =  this.getView().findViewById(R.id.TextOnFrag);

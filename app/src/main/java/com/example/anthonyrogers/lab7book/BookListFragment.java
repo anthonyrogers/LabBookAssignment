@@ -12,7 +12,6 @@ import android.widget.ListView;
 
 public class BookListFragment extends Fragment {
 
-
     Context parent;
     ListView listView;
 
@@ -31,7 +30,6 @@ public class BookListFragment extends Fragment {
         super.onAttach(context);
         this.parent = context;
     }
-
 
     //creates an array list and sets an event listener to the parents public method that is going to be there due
     //to it implementing an interface;
@@ -55,7 +53,6 @@ public class BookListFragment extends Fragment {
 
         return view;
     }
-
 
     public interface OnFragmentInteractionListener {
         void BookName(String nameOfBook);
