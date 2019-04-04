@@ -1,7 +1,5 @@
 package com.example.anthonyrogers.lab7book;
-
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -17,15 +15,16 @@ public class BookListFragment extends Fragment {
 
     Context parent;
     ListView listView;
-    public BookListFragment() {
 
+    public BookListFragment() {
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -56,7 +55,6 @@ public class BookListFragment extends Fragment {
 
         return view;
     }
-
 
 
     public interface OnFragmentInteractionListener {
