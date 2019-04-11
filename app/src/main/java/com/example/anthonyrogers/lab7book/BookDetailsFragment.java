@@ -77,5 +77,7 @@ public class BookDetailsFragment extends Fragment {
     public void displayBook(String title){
         //TextView t =  this.getView().findViewById(R.id.TextOnFrag);
        // t.setText(title);
+
+
     }
 }

@@ -9,11 +9,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 
 public class BookListFragment extends Fragment {
 
     Context parent;
     ListView listView;
+    ArrayList<String> list = new ArrayList<>();
 
     public BookListFragment() {
     }
@@ -40,7 +43,7 @@ public class BookListFragment extends Fragment {
 
       listView = view.findViewById(R.id.List_View);
        ArrayAdapter adapter = new ArrayAdapter<>(parent, android.R.layout.simple_list_item_1,
-               parent.getResources().getStringArray(R.array.bookArray));
+               list);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

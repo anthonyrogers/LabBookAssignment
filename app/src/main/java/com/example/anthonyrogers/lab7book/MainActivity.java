@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     BookDetailsFragment bdf;
     ArrayList<Book> list = new ArrayList<>();
     Button button;
+    BookListFragment blf;
+    String URL = "https://kamorris.com/lab/audlib/booksearch.php?search=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)  {
@@ -84,62 +86,65 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         };
 
         t.start();
+        if(singlePane) {
+            final TextView textView = findViewById(R.id.txtBookEdit);
+            button = findViewById(R.id.btnSearch);
 
-        final TextView textView = findViewById(R.id.txtBookEdit);
-        button = findViewById(R.id.btnSearch);
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                Thread j = new Thread() {
-                    @Override
-                    public void run() {
-                        URL BookurlJson;
+                    Thread j = new Thread() {
+                        @Override
+                        public void run() {
+                            URL BookurlJson;
 
-                        try {
-                            BookurlJson = new URL("https://kamorris.com/lab/audlib/booksearch.php?search=" + textView.getText().toString());
-                            BufferedReader reader = new BufferedReader(
-                                    new InputStreamReader(
-                                            BookurlJson.openStream()));
+                            try {
+                                BookurlJson = new URL(URL + textView.getText().toString());
+                                BufferedReader reader = new BufferedReader(
+                                        new InputStreamReader(
+                                                BookurlJson.openStream()));
 
-                            String response = "", tmpResponse;
+                                String response = "", tmpResponse;
 
-                            tmpResponse = reader.readLine();
-                            while (tmpResponse != null) {
-                                response = response + tmpResponse;
                                 tmpResponse = reader.readLine();
-                            }
+                                while (tmpResponse != null) {
+                                    response = response + tmpResponse;
+                                    tmpResponse = reader.readLine();
+                                }
 
-                            JSONArray jsonArray = new JSONArray(response);
+                                JSONArray jsonArray = new JSONArray(response);
                                 list = new ArrayList<Book>();
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                String o = jsonArray.get(i).toString();
-                                JSONObject obj = new JSONObject(o);
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String o = jsonArray.get(i).toString();
+                                    JSONObject obj = new JSONObject(o);
 
-                                Book book = new Book();
-                                book.title = obj.getString("title");
-                                book.author = obj.getString("author");
-                                book.published = obj.getInt("published");
-                                book.id = obj.getInt("book_id");
-                                book.coverURL = obj.getString("cover_url");
-                                list.add(book);
+                                    Book book = new Book();
+                                    book.title = obj.getString("title");
+                                    book.author = obj.getString("author");
+                                    book.published = obj.getInt("published");
+                                    book.id = obj.getInt("book_id");
+                                    book.coverURL = obj.getString("cover_url");
+                                    list.add(book);
+                                }
+
+                                Message message = new Message();
+                                message.obj = list;
+                                message.what = 0;
+
+                                handler.sendMessage(message);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-
-                            Message message = new Message();
-                            message.obj = list;
-                            message.what = 0;
-
-                            handler.sendMessage(message);
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
-                    }
-                };
-                j.start();
-            }
-        });
+                    };
+                    j.start();
+                }
+
+            });
+        }
     }
 
 
@@ -147,15 +152,16 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     @Override
     public void BookName(String nameOfBook) {
 
-        //This creates a new Book Details Fragment Everytime a listview is clicked
-        //TODO: unmark this if you would like to create a new fragment of BookDetailsFragment when
-        //TODO: when viewing on a tablet or in landscape mode. Current we only create on instance and change textview
-        // BookDetailsFragment df = BookDetailsFragment.newInstance(nameOfBook);
-        // fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
+       for(int i = 0; i < list.size(); i++){
+           if(list.get(i).title == nameOfBook){
+               BookDetailsFragment df = BookDetailsFragment.newInstance(list.get(i));
+               fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
+           }
+        }
 
-        bdf.displayBook(nameOfBook);
+
+       // bdf.displayBook(nameOfBook);
     }
-
 
     @SuppressLint("HandlerLeak")
     Handler handler = new Handler()
@@ -173,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             //this runs the fragment if the phone is in portrait mode
             if(singlePane){
                 mViewPager = findViewById(R.id.view_pager);
-                Log.d("Books in Activity", list.get(0).author);
                 mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), list));
             }
 
@@ -182,16 +187,21 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             //this sets frame one to a list and frame 2 to a single object fragment that will change textviews
             if (!singlePane) {
 
-                fm.beginTransaction()
-                        .replace(R.id.frame1, new BookListFragment())
-                        .commit();
+                String curString;
 
+                ArrayList<String> arr = new ArrayList<>();
+                blf = new BookListFragment();
+                for(int j = 0; j<list.size(); j++){
+                    arr.add(list.get(j).title);
+                }
+                blf.list = arr;
+                fm.beginTransaction()
+                        .replace(R.id.frame1, blf)
+                        .commit();
                 fm.beginTransaction()
                         .replace(R.id.frame2, bdf)
                         .commit();
             }
         }
     };
-
-
 }
