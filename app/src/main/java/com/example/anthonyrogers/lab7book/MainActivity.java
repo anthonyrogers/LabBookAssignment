@@ -101,9 +101,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         @Override
         public void handleMessage(Message msg) {
 
-
-            ArrayList<Book> hey = (ArrayList<Book>) msg.obj;
-            list = hey;
+            list = (ArrayList<Book>) msg.obj;
 
             bdf = new BookDetailsFragment();
 
@@ -113,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             //this runs the fragment if the phone is in portrait mode
             if(singlePane){
                 mViewPager = findViewById(R.id.view_pager);
-                //Log.d("Books in Activity", list.get(0).author);
+                Log.d("Books in Activity", list.get(0).author);
                 mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), list));
             }
 

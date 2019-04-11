@@ -15,10 +15,7 @@ public class MyViewPagerAdapter extends FragmentStatePagerAdapter {
     public MyViewPagerAdapter(FragmentManager fm, ArrayList<Book> arrayOfBooks) {
         super(fm);
         array.addAll(arrayOfBooks);
-
-        Log.d("Books", arrayOfBooks.toString());
         notifyDataSetChanged();
-        //array = arrayOfBooks;
     }
 
     //this is for the view pager. This creates a new instance of bookDetailsFragment using the factory
