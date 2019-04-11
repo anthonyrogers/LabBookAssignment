@@ -8,7 +8,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -22,13 +26,15 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     boolean singlePane;
     FragmentManager fm;
     BookDetailsFragment bdf;
-    TextView text;
     ArrayList<Book> list = new ArrayList<>();
+    Button button;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         Thread t = new Thread() {
             @Override
@@ -79,8 +85,64 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
         t.start();
 
+        final TextView textView = findViewById(R.id.txtBookEdit);
+        button = findViewById(R.id.btnSearch);
 
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Thread j = new Thread() {
+                    @Override
+                    public void run() {
+                        URL BookurlJson;
+
+                        try {
+                            BookurlJson = new URL("https://kamorris.com/lab/audlib/booksearch.php?search=" + textView.getText().toString());
+                            BufferedReader reader = new BufferedReader(
+                                    new InputStreamReader(
+                                            BookurlJson.openStream()));
+
+                            String response = "", tmpResponse;
+
+                            tmpResponse = reader.readLine();
+                            while (tmpResponse != null) {
+                                response = response + tmpResponse;
+                                tmpResponse = reader.readLine();
+                            }
+
+                            JSONArray jsonArray = new JSONArray(response);
+                                list = new ArrayList<Book>();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                String o = jsonArray.get(i).toString();
+                                JSONObject obj = new JSONObject(o);
+
+                                Book book = new Book();
+                                book.title = obj.getString("title");
+                                book.author = obj.getString("author");
+                                book.published = obj.getInt("published");
+                                book.id = obj.getInt("book_id");
+                                book.coverURL = obj.getString("cover_url");
+                                list.add(book);
+                            }
+
+                            Message message = new Message();
+                            message.obj = list;
+                            message.what = 0;
+
+                            handler.sendMessage(message);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                j.start();
+            }
+        });
     }
+
+
 
     @Override
     public void BookName(String nameOfBook) {
