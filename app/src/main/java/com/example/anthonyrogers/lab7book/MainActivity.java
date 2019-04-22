@@ -1,7 +1,14 @@
 package com.example.anthonyrogers.lab7book;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -20,15 +27,28 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements BookListFragment.OnFragmentInteractionListener {
+import edu.temple.audiobookplayer.AudiobookService;
+
+import static java.security.AccessController.getContext;
+
+public class MainActivity extends AppCompatActivity implements BookListFragment.OnFragmentInteractionListener,
+                                                               BookDetailsFragment.AudioStatusSelectionDelegate {
 
     private ViewPager mViewPager;
     boolean singlePane;
     FragmentManager fm;
+    MyViewPagerAdapter mMyViewPagerAdapter;
     BookDetailsFragment bdf;
     ArrayList<Book> list = new ArrayList<>();
     Button button;
     BookListFragment blf;
+
+    // AudioService Properties
+    AudiobookService.MediaControlBinder mAudioBinder;
+    AudiobookService mAudioBookService;
+    Boolean mIsAudioServiceBound = false;
+    Handler mProgressHandler;
+
     String URL = "https://kamorris.com/lab/audlib/booksearch.php?search=";
 
     @Override
@@ -36,19 +56,23 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        mProgressHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message message) {
+                getCurrentFragmentFromViewPager().updateSeekBarProgress(message.what);
+            }
+        };
 
         Thread t = new Thread() {
             @Override
             public void run() {
+
                 URL BookurlJson;
 
                 try {
                     BookurlJson = new URL("https://kamorris.com/lab/audlib/booksearch.php");
 
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(
-                                    BookurlJson.openStream()));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(BookurlJson.openStream()));
 
                     String response = "", tmpResponse;
 
@@ -70,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                         book.published = obj.getInt("published");
                         book.id = obj.getInt("book_id");
                         book.coverURL = obj.getString("cover_url");
+                        book.duration = obj.getInt("duration");
                         list.add(book);
                     }
 
@@ -89,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         if(singlePane) {
             final TextView textView = findViewById(R.id.txtBookEdit);
             button = findViewById(R.id.btnSearch);
-
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -126,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                                     book.published = obj.getInt("published");
                                     book.id = obj.getInt("book_id");
                                     book.coverURL = obj.getString("cover_url");
+                                    book.duration = obj.getInt("duration");
                                     list.add(book);
                                 }
 
@@ -147,19 +172,21 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         }
     }
 
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindToAudioService();
+    }
 
     @Override
     public void BookName(String nameOfBook) {
 
        for(int i = 0; i < list.size(); i++){
-           if(list.get(i).title == nameOfBook){
+           if(list.get(i).title.equals(nameOfBook)){
                BookDetailsFragment df = BookDetailsFragment.newInstance(list.get(i));
                fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
            }
         }
-
-
        // bdf.displayBook(nameOfBook);
     }
 
@@ -171,15 +198,14 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
             list = (ArrayList<Book>) msg.obj;
 
-            bdf = new BookDetailsFragment();
-
             //this check to see if the frame2 id is available and says true if it is and false if its not.
             singlePane = findViewById(R.id.frame2) == null;
 
             //this runs the fragment if the phone is in portrait mode
             if(singlePane){
                 mViewPager = findViewById(R.id.view_pager);
-                mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), list));
+                mMyViewPagerAdapter = new MyViewPagerAdapter(getSupportFragmentManager(), list);
+                mViewPager.setAdapter(mMyViewPagerAdapter);
             }
 
             fm = getSupportFragmentManager();
@@ -188,6 +214,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             if (!singlePane) {
 
                 String curString;
+
+                bdf = new BookDetailsFragment();
 
                 ArrayList<String> arr = new ArrayList<>();
                 blf = new BookListFragment();
@@ -204,4 +232,74 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }
         }
     };
+
+    // Interface Implementation for BookDetail's Audio Controls
+    @Override
+    public void playPauseStatusButtonPressed(BookDetailsFragment.AudioStatusSelection playPause, Book book, int position) {
+        if (mAudioBinder != null) {
+            switch (playPause) {
+                case play:
+                    if (position != 0) {
+                        mAudioBinder.play(book.id, position);
+                    } else {
+                        mAudioBinder.play(book.id);
+                    }
+                case pause:
+                    mAudioBinder.pause();
+            }
+        }
+    }
+
+    @Override
+    public void stopButtonPressed(BookDetailsFragment.AudioStatusSelection stop) {
+        if (mAudioBinder != null) {
+            mAudioBinder.stop();
+        }
+    }
+
+    @Override
+    public void seekBarProgressBeingSet(int value) {
+        if (mAudioBinder != null) {
+            getCurrentFragmentFromViewPager().updateSeekBarProgress(value);
+            mAudioBinder.seekTo(value);
+        }
+    }
+
+    // Methods needed for service connection/binding to the audio service
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            Toast.makeText(getApplicationContext(), "Audio Service is connected", Toast.LENGTH_SHORT).show();
+            mAudioBinder = (AudiobookService.MediaControlBinder) service;
+            mAudioBinder.setProgressHandler(mProgressHandler);
+            mIsAudioServiceBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Toast.makeText(getApplicationContext(), "Service is disconnected", Toast.LENGTH_SHORT).show();
+            mIsAudioServiceBound = false;
+            mAudioBookService = null;
+        }
+    };
+
+    void bindToAudioService() {
+        bindService(new Intent(this, AudiobookService.class), mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    void unbindFromAudioService() {
+        if (mIsAudioServiceBound) {
+            unbindService(mConnection);
+            mIsAudioServiceBound = false;
+        }
+    }
+
+    private BookDetailsFragment getCurrentFragmentFromViewPager() {
+        return (BookDetailsFragment) mMyViewPagerAdapter.instantiateItem(mViewPager, mViewPager.getCurrentItem());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindFromAudioService();
+    }
 }
