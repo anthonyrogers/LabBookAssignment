@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         mProgressHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message message) {
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }
         };
 
-        Thread t = new Thread() {
+     /*  Thread t = new Thread() {
             @Override
             public void run() {
 
@@ -83,10 +84,10 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                     }
 
                     JSONArray jsonArray = new JSONArray(response);
-
+                    JSONObject obj;
                     for (int i = 0; i < jsonArray.length(); i++) {
                         String o = jsonArray.get(i).toString();
-                        JSONObject obj = new JSONObject(o);
+                        obj = new JSONObject(o);
 
                         Book book = new Book();
                         book.title = obj.getString("title");
@@ -110,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }
         };
 
-        t.start();
-        if(singlePane) {
+        t.start();*/
+        //if(singlePane) {
             final TextView textView = findViewById(R.id.txtBookEdit);
             button = findViewById(R.id.btnSearch);
 
@@ -165,23 +166,24 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                             }
                         }
                     };
-                    j.start();
+                  j.start();
                 }
 
             });
-        }
+        //}
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         bindToAudioService();
+
     }
 
     @Override
     public void BookName(String nameOfBook) {
 
-       for(int i = 0; i < list.size(); i++){
+      for(int i = 0; i < list.size(); i++){
            if(list.get(i).title.equals(nameOfBook)){
                BookDetailsFragment df = BookDetailsFragment.newInstance(list.get(i));
                fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
@@ -206,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                 mViewPager = findViewById(R.id.view_pager);
                 mMyViewPagerAdapter = new MyViewPagerAdapter(getSupportFragmentManager(), list);
                 mViewPager.setAdapter(mMyViewPagerAdapter);
+                //mAudioBinder.play(1);
             }
 
             fm = getSupportFragmentManager();
@@ -241,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                 case play:
                     if (position != 0) {
                         mAudioBinder.play(book.id, position);
-                    } else {
+                    }else {
                         mAudioBinder.play(book.id);
                     }
                 case pause:
@@ -257,9 +260,9 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         }
     }
 
-    @Override
+   @Override
     public void seekBarProgressBeingSet(int value) {
-        if (mAudioBinder != null) {
+      if (mAudioBinder != null) {
             getCurrentFragmentFromViewPager().updateSeekBarProgress(value);
             mAudioBinder.seekTo(value);
         }
@@ -301,5 +304,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     protected void onDestroy() {
         super.onDestroy();
         unbindFromAudioService();
+
     }
 }

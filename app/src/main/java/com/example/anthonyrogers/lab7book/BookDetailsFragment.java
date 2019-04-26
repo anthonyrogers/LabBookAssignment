@@ -98,7 +98,7 @@ public class BookDetailsFragment extends Fragment {
             }
         });
 
-        stopButton.setOnClickListener(new View.OnClickListener() {
+       stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 delegate.stopButtonPressed(AudioStatusSelection.stop);
