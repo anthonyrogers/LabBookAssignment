@@ -4,13 +4,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
 
-
 import java.util.ArrayList;
 
 public class MyViewPagerAdapter extends FragmentStatePagerAdapter {
 
     ArrayList<Book> array = new ArrayList<>();
-
+    BookDetailsFragment mCurrentBookDetail;
 
     public MyViewPagerAdapter(FragmentManager fm, ArrayList<Book> arrayOfBooks) {
         super(fm);
@@ -22,7 +21,8 @@ public class MyViewPagerAdapter extends FragmentStatePagerAdapter {
     //method inside of the the fragment
     @Override
     public Fragment getItem(int i) {
-        return BookDetailsFragment.newInstance(array.get(i));
+        mCurrentBookDetail = BookDetailsFragment.newInstance(array.get(i));
+        return mCurrentBookDetail;
     }
 
     @Override
@@ -31,11 +31,9 @@ public class MyViewPagerAdapter extends FragmentStatePagerAdapter {
         return array.size();
     }
 
-
     @Override
     public int getItemPosition(Object object) {
         return POSITION_NONE;
     }
-
 }
 

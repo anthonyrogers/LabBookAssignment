@@ -3,17 +3,16 @@ package com.example.anthonyrogers.lab7book;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
 public class Book implements Parcelable {
 
     int id;
+    int duration;
+    int published;
     String title;
     String author;
-    int published;
     String coverURL;
 
     public Book(){}
-
 
     protected Book(Parcel in) {
         id = in.readInt();

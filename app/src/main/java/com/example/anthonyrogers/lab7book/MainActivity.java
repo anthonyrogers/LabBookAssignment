@@ -57,8 +57,14 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         setContentView(R.layout.activity_main);
 
 
+        mProgressHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message message) {
+                getCurrentFragmentFromViewPager().updateSeekBarProgress(message.what);
+            }
+        };
 
-        Thread t = new Thread() {
+     /*  Thread t = new Thread() {
             @Override
             public void run() {
 
@@ -78,10 +84,10 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                     }
 
                     JSONArray jsonArray = new JSONArray(response);
-
+                    JSONObject obj;
                     for (int i = 0; i < jsonArray.length(); i++) {
                         String o = jsonArray.get(i).toString();
-                        JSONObject obj = new JSONObject(o);
+                        obj = new JSONObject(o);
 
                         Book book = new Book();
                         book.title = obj.getString("title");
@@ -105,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }
         };
 
-        t.start();
-        if(singlePane) {
+        t.start();*/
+        //if(singlePane) {
             final TextView textView = findViewById(R.id.txtBookEdit);
             button = findViewById(R.id.btnSearch);
 
@@ -160,20 +166,25 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                             }
                         }
                     };
-                    j.start();
+                  j.start();
                 }
 
             });
-        }
+        //}
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindToAudioService();
 
+    }
 
     @Override
     public void BookName(String nameOfBook) {
 
-       for(int i = 0; i < list.size(); i++){
-           if(list.get(i).title == nameOfBook){
+      for(int i = 0; i < list.size(); i++){
+           if(list.get(i).title.equals(nameOfBook)){
                BookDetailsFragment df = BookDetailsFragment.newInstance(list.get(i));
                fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
            }
@@ -195,7 +206,9 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             //this runs the fragment if the phone is in portrait mode
             if(singlePane){
                 mViewPager = findViewById(R.id.view_pager);
-                mViewPager.setAdapter(new MyViewPagerAdapter(getSupportFragmentManager(), list));
+                mMyViewPagerAdapter = new MyViewPagerAdapter(getSupportFragmentManager(), list);
+                mViewPager.setAdapter(mMyViewPagerAdapter);
+                //mAudioBinder.play(1);
             }
 
             fm = getSupportFragmentManager();
@@ -222,4 +235,75 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }
         }
     };
+
+    // Interface Implementation for BookDetail's Audio Controls
+    @Override
+    public void playPauseStatusButtonPressed(BookDetailsFragment.AudioStatusSelection playPause, Book book, int position) {
+        if (mAudioBinder != null) {
+            switch (playPause) {
+                case play:
+                    if (position != 0) {
+                        mAudioBinder.play(book.id, position);
+                    }else {
+                        mAudioBinder.play(book.id);
+                    }
+                case pause:
+                    mAudioBinder.pause();
+            }
+        }
+    }
+
+    @Override
+    public void stopButtonPressed(BookDetailsFragment.AudioStatusSelection stop) {
+        if (mAudioBinder != null) {
+            mAudioBinder.stop();
+        }
+    }
+
+   @Override
+    public void seekBarProgressBeingSet(int value) {
+      if (mAudioBinder != null) {
+            getCurrentFragmentFromViewPager().updateSeekBarProgress(value);
+            mAudioBinder.seekTo(value);
+        }
+    }
+
+    // Methods needed for service connection/binding to the audio service
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            Toast.makeText(getApplicationContext(), "Audio Service is connected", Toast.LENGTH_SHORT).show();
+            mAudioBinder = (AudiobookService.MediaControlBinder) service;
+            mAudioBinder.setProgressHandler(mProgressHandler);
+            mIsAudioServiceBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Toast.makeText(getApplicationContext(), "Service is disconnected", Toast.LENGTH_SHORT).show();
+            mIsAudioServiceBound = false;
+            mAudioBookService = null;
+        }
+    };
+
+    void bindToAudioService() {
+        bindService(new Intent(this, AudiobookService.class), mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    void unbindFromAudioService() {
+        if (mIsAudioServiceBound) {
+            unbindService(mConnection);
+            mIsAudioServiceBound = false;
+        }
+    }
+
+    private BookDetailsFragment getCurrentFragmentFromViewPager() {
+        return (BookDetailsFragment) mMyViewPagerAdapter.instantiateItem(mViewPager, mViewPager.getCurrentItem());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindFromAudioService();
+
+    }
 }
