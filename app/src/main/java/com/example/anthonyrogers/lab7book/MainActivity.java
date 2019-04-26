@@ -1,7 +1,14 @@
 package com.example.anthonyrogers.lab7book;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -20,15 +27,28 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements BookListFragment.OnFragmentInteractionListener {
+import edu.temple.audiobookplayer.AudiobookService;
+
+import static java.security.AccessController.getContext;
+
+public class MainActivity extends AppCompatActivity implements BookListFragment.OnFragmentInteractionListener,
+                                                               BookDetailsFragment.AudioStatusSelectionDelegate {
 
     private ViewPager mViewPager;
     boolean singlePane;
     FragmentManager fm;
+    MyViewPagerAdapter mMyViewPagerAdapter;
     BookDetailsFragment bdf;
     ArrayList<Book> list = new ArrayList<>();
     Button button;
     BookListFragment blf;
+
+    // AudioService Properties
+    AudiobookService.MediaControlBinder mAudioBinder;
+    AudiobookService mAudioBookService;
+    Boolean mIsAudioServiceBound = false;
+    Handler mProgressHandler;
+
     String URL = "https://kamorris.com/lab/audlib/booksearch.php?search=";
 
     @Override
@@ -41,14 +61,13 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         Thread t = new Thread() {
             @Override
             public void run() {
+
                 URL BookurlJson;
 
                 try {
                     BookurlJson = new URL("https://kamorris.com/lab/audlib/booksearch.php");
 
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(
-                                    BookurlJson.openStream()));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(BookurlJson.openStream()));
 
                     String response = "", tmpResponse;
 
@@ -70,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                         book.published = obj.getInt("published");
                         book.id = obj.getInt("book_id");
                         book.coverURL = obj.getString("cover_url");
+                        book.duration = obj.getInt("duration");
                         list.add(book);
                     }
 
@@ -89,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         if(singlePane) {
             final TextView textView = findViewById(R.id.txtBookEdit);
             button = findViewById(R.id.btnSearch);
-
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -126,6 +145,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                                     book.published = obj.getInt("published");
                                     book.id = obj.getInt("book_id");
                                     book.coverURL = obj.getString("cover_url");
+                                    book.duration = obj.getInt("duration");
                                     list.add(book);
                                 }
 
@@ -158,8 +178,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                fm.beginTransaction().replace(R.id.frame2, df).addToBackStack(null).commit();
            }
         }
-
-
        // bdf.displayBook(nameOfBook);
     }
 
@@ -170,8 +188,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         public void handleMessage(Message msg) {
 
             list = (ArrayList<Book>) msg.obj;
-
-            bdf = new BookDetailsFragment();
 
             //this check to see if the frame2 id is available and says true if it is and false if its not.
             singlePane = findViewById(R.id.frame2) == null;
@@ -188,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             if (!singlePane) {
 
                 String curString;
+
+                bdf = new BookDetailsFragment();
 
                 ArrayList<String> arr = new ArrayList<>();
                 blf = new BookListFragment();
